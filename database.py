@@ -31,6 +31,7 @@ class Base(DeclarativeBase):
     pass
 
 
+# noinspection SpellCheckingInspection,PyMethodParameters,PyUnresolvedReferences
 class CommonMixin:
     """Mixin to add common attributes and functionality to models."""
 
@@ -151,9 +152,7 @@ class FrequencySeverityModel(ModelFile):
 
     id: Mapped[int] = mapped_column(ForeignKey("modelfile.id"), primary_key=True)
     threshold: Mapped[int] = mapped_column(nullable=False)
-    lossfile_id: Mapped[int] = mapped_column(
-        ForeignKey("histolossfile.id")
-    )
+    lossfile_id: Mapped[int] = mapped_column(ForeignKey("histolossfile.id"))
     lossfile: Mapped["HistoLossFile"] = relationship()
 
     frequencymodel: Mapped["FrequencyModel"] = relationship(
@@ -221,12 +220,13 @@ class ModelYearLoss(CommonMixin, Base):
 # Database Setup
 # --------------------------------------
 
-DATABASE_URI = "sqlite:///tnv_database.db"
+# DATABASE_URI = "sqlite:///tnv_database.db"
+DATABASE_URI = "postgresql+psycopg2://postgres:aqzsed12@localhost:5432/tnv_database"
 engine = create_engine(DATABASE_URI)
 
 # Ensure foreign key constraints are enabled
-with engine.connect() as connection:
-    connection.execute(text("PRAGMA foreign_keys = ON;"))
+# with engine.connect() as connection:
+#     connection.execute(text("PRAGMA foreign_keys = ON;"))
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
