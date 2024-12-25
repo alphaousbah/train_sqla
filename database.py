@@ -224,25 +224,26 @@ class ModelYearLoss(CommonMixin, Base):
 DATABASE_URI = "postgresql+psycopg2://postgres:aqzsed12@localhost:5432/tnv_database"
 engine = create_engine(DATABASE_URI)
 
-# Ensure foreign key constraints are enabled
-# with engine.connect() as connection:
-#     connection.execute(text("PRAGMA foreign_keys = ON;"))
+# Ensure foreign key constraints are enabled in SQLite
+if engine.dialect.name == "sqlite":
+    with engine.connect() as connection:
+        connection.execute(text("PRAGMA foreign_keys = ON;"))
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
 
-# @contextmanager
-# def session_scope():
-#     """Provide a transactional scope for database operations."""
-#     session = Session()
-#     try:
-#         yield session
-#         session.commit()
-#     except SQLAlchemyError as e:
-#         session.rollback()
-#         print(f"Error: {e}")
-#         raise
-#     finally:
-#         session.close()
+@contextmanager
+def session_scope():
+    """Provide a transactional scope for database operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Error: {e}")
+        raise
+    finally:
+        session.close()
