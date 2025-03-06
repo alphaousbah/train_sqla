@@ -1,56 +1,106 @@
+from dataclasses import dataclass
+from enum import Enum
+
 import numpy as np
 import polars as pl
-from scipy.stats import poisson, nbinom, pareto
-
-from utils import DistributionType, LossType, DistributionInput
+from scipy.stats import nbinom, pareto, poisson
 
 
-# Main function to generate model year loss
+class ModelType(Enum):
+    """Defines the supported loss models."""
+
+    EMPIRICAL = "empirical"
+    # FREQUENCY_SEVERITY = "frequency_severity"
+    FREQUENCY_SEVERITY = "frequencyseveritymodel"
+    COMPOSITE_FREQUENCY_SEVERITY = "composite_frequency_severity"
+    EXPOSURE_BASED = "exposure_based"
+
+
+class DistributionType(Enum):
+    """Defines the supported statistical distributions."""
+
+    POISSON = "poisson"
+    NEGATIVE_BINOMIAL = "negative_binomial"
+    PARETO = "pareto"
+
+
+class LossType(Enum):
+    """Defines the loss types."""
+
+    CAT = "cat"
+    NON_CAT = "non_cat"
+    CAT_NON_CAT = "cat_non_cat"
+
+
+@dataclass
+class DistributionInput:
+    """
+    Configuration for a statistical distribution.
+
+    Attributes:
+        dist: The distribution type (enum).
+        params: Parameters specific to the distribution.
+    """
+
+    dist: DistributionType
+    params: list[float]
+
+
+# Main function to generate model year losses
 def get_modelyearloss_frequency_severity(
-        frequency_input: DistributionInput,
-        severity_input: DistributionInput,
-        simulated_years: int,
-        modelfile_id: int,
+    frequency_input: DistributionInput,
+    severity_input: DistributionInput,
+    simulated_years: int,
+    modelfile_id: int,
 ) -> pl.DataFrame:
     """
-    Generate loss data for a frequency-severity model over a number of simulated years.
+    Generates a simulated dataset of yearly loss events based on frequency
+    and severity distributions.
 
     Args:
-        frequency_input (DistributionInput): Distribution defining the frequency of events per year.
-        severity_input (DistributionInput): Distribution defining the severity of each event.
-        simulated_years (int): Number of years to simulate.
-        modelfile_id (int): ID of the related model file.
+        frequency_input (DistributionInput): The frequency distribution input.
+        severity_input (DistributionInput): The severity distribution input.
+        simulated_years (int): The number of years to simulate.
+        modelfile_id (int): Identifier for the model file.
 
     Returns:
-        dict: A dictionary with the following keys:
-            - "year": List of years for each loss event.
-            - "day": Random day of the year for each loss.
-            - "loss": Calculated loss values.
-            - "loss_type": Type of loss (e.g., catastrophic or non-catastrophic).
+        pl.DataFrame: A Polars DataFrame containing simulated loss events
+                      with associated metadata.
     """
+    # Generate frequency and loss-related data
     frequencies = generate_frequencies(frequency_input, simulated_years)
     loss_count = frequencies.sum()
     years = generate_years(frequencies.tolist())
     days = generate_days(loss_count)
     losses = generate_losses_from_parametric_dist(severity_input, loss_count)
     loss_types = generate_loss_types(loss_count)
-    modelfile_ids = np.repeat(modelfile_id, loss_count)
 
+    # Create a default array for repeated `None` values
+    none_array = np.full(loss_count, None, dtype=object)
+
+    # Create DataFrame efficiently
     modelyearloss = pl.DataFrame(
         {
             "year": years,
             "day": days,
             "loss": losses,
             "loss_type": loss_types,
-            "modelfile_id": modelfile_ids,
+            "peril_id": none_array,
+            "peril": none_array,
+            "region": none_array,
+            "model_hash": none_array,
+            "model": none_array,
+            "line_of_business": none_array,
+            "modelfile_id": np.full(loss_count, modelfile_id),
         }
     )
+
     return modelyearloss
 
 
 def generate_frequencies(
-        frequency_input: DistributionInput,
-        size: int,
+    frequency_input: DistributionInput,
+    size: int,
 ) -> np.ndarray:
     """
     Generate a list of event frequencies based on a specified distribution.
@@ -76,9 +126,7 @@ def generate_years(frequencies: list[int]) -> list[int]:
     Returns:
         list[int]: A list of years, repeated according to their respective frequencies.
     """
-    years = [
-        year for year, freq in enumerate(frequencies, start=1) for _ in range(freq)
-    ]
+    years = [year for year, freq in enumerate(frequencies) for _ in range(freq)]
     return years
 
 
@@ -111,8 +159,8 @@ def generate_loss_types(size: int) -> np.ndarray:
 
 
 def generate_losses_from_parametric_dist(
-        severity_input: DistributionInput,
-        loss_count: int,
+    severity_input: DistributionInput,
+    loss_count: int,
 ) -> np.ndarray:
     """
     Generates a set of rounded loss values from a parametric distribution.
@@ -130,7 +178,7 @@ def generate_losses_from_parametric_dist(
 
 
 def get_sample_from_dist(
-        distribution_input: DistributionInput, size: int
+    distribution_input: DistributionInput, size: int
 ) -> np.ndarray:
     """
     Generate a sample from the specified distribution.

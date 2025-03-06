@@ -5,9 +5,9 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     String,
-    text,
     Table,
     create_engine,
+    text,
 )
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import (
@@ -18,7 +18,6 @@ from sqlalchemy.orm import (
     relationship,
     sessionmaker,
 )
-
 
 # --------------------------------------
 # Base Classes and Mixins
