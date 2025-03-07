@@ -51,7 +51,7 @@ class DistributionInput:
 def get_modelyearloss_frequency_severity(
     frequency_input: DistributionInput,
     severity_input: DistributionInput,
-    loss_type: LossType,
+    cat_share: float,
     simulated_years: int,
     modelfile_id: int,
 ) -> pl.DataFrame:
@@ -61,13 +61,13 @@ def get_modelyearloss_frequency_severity(
     Args:
         frequency_input (DistributionInput): Configuration for the frequency distribution.
         severity_input (DistributionInput): Configuration for the severity distribution.
-        loss_type (LossType): The type of loss being modeled.
+        cat_share (float): The proportion of losses attributed to catastrophic events.
         simulated_years (int): Number of years to simulate loss events.
         modelfile_id (int): Unique identifier for the model file.
 
     Returns:
         pl.DataFrame: A Polars DataFrame containing simulated loss events, including
-                      year, day, loss amount, loss type, and other metadata.
+                      year, day, loss amount, catastrophe share, and other metadata.
     """
     # Generate frequency and loss-related data
     frequencies = generate_frequencies(frequency_input, simulated_years)
@@ -75,7 +75,7 @@ def get_modelyearloss_frequency_severity(
     years = generate_years(frequencies.tolist())
     days = generate_days(loss_count)
     losses = generate_losses_from_parametric_dist(severity_input, loss_count)
-    loss_types = generate_loss_types(loss_count)
+    loss_types = generate_loss_types(cat_share, loss_count)
 
     # Create a default array for repeated `None` values
     none_array = np.full(loss_count, None, dtype=object)
@@ -146,17 +146,23 @@ def generate_days(size: int) -> np.ndarray:
     return days
 
 
-def generate_loss_types(size: int) -> np.ndarray:
+def generate_loss_types(cat_share: float, size: int) -> np.ndarray:
     """
-    Generate random loss types (catastrophic or non-catastrophic) for events.
+    Generate random loss types (catastrophic or non-catastrophic) based on a given share.
 
     Args:
-        size (int): Number of loss types to generate.
+        cat_share (float): The proportion of losses classified as catastrophic (between 0 and 1).
+        size (int): The number of loss types to generate.
 
     Returns:
-        np.ndarray: An array of randomly chosen loss types (catastrophic or non-catastrophic).
+        np.ndarray: An array of randomly assigned loss types, indicating whether each event is
+                    catastrophic or non-catastrophic.
     """
-    loss_types = np.random.choice([LossType.CAT.value, LossType.NON_CAT.value], size)
+    loss_types = np.random.choice(
+        [LossType.CAT.value, LossType.NON_CAT.value],
+        size=size,
+        p=[cat_share, 1 - cat_share],
+    )
     return loss_types
 
 
