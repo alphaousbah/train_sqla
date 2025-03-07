@@ -19,6 +19,7 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
+
 # --------------------------------------
 # Base Classes and Mixins
 # --------------------------------------
@@ -59,6 +60,9 @@ class Client(CommonMixin, Base):
     analyses: Mapped[List["Analysis"]] = relationship(
         back_populates="client", cascade="all, delete-orphan"
     )
+    premiumfiles: Mapped[List["PremiumFile"]] = relationship(
+        back_populates="client", cascade="all, delete-orphan"
+    )
     histolossfiles: Mapped[List["HistoLossFile"]] = relationship(
         back_populates="client", cascade="all, delete-orphan"
     )
@@ -74,13 +78,35 @@ class Analysis(CommonMixin, Base):
     client_id: Mapped[int] = mapped_column(ForeignKey("client.id"), nullable=False)
     client: Mapped["Client"] = relationship(back_populates="analyses")
 
+    premiumfiles: Mapped[List["PremiumFile"]] = relationship(
+        secondary=lambda: analysis_premiumfile_table, back_populates="analyses"  # TODO: To be updated
+    )
     histolossfiles: Mapped[List["HistoLossFile"]] = relationship(
-        secondary=lambda: analysis_histolossfile_table, back_populates="analyses"
+        secondary=lambda: analysis_histolossfile_table, back_populates="analyses"  # TODO: To be updated
     )
     modelfiles: Mapped[List["ModelFile"]] = relationship(
-        secondary=lambda: analysis_modelfile_table, back_populates="analyses"
+        secondary=lambda: analysis_modelfile_table, back_populates="analyses"  # TODO: To be updated
     )
 
+
+class PremiumFile(CommonMixin, Base):
+    """Represents a premium file."""
+    id: Mapped[int] = mapped_column(primary_key=True)
+    client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
+    client: Mapped["Client"] = relationship(back_populates="premiumfiles")
+
+    # TODO: To be added
+    analyses: Mapped[List[Analysis]] = relationship(
+        secondary=lambda: analysis_premiumfile_table, back_populates="premiumfiles"
+    )
+
+
+analysis_premiumfile_table: Final[Table] = Table(
+    "analysis_premiumfile",
+    Base.metadata,
+    Column("analysis_id", ForeignKey("analysis.id"), primary_key=True),
+    Column("premiumfile_id", ForeignKey("premiumfile.id"), primary_key=True),
+)
 
 class HistoLossFile(CommonMixin, Base):
     """Represents a historical loss file."""
@@ -153,6 +179,8 @@ class FrequencySeverityModel(ModelFile):
     threshold: Mapped[int] = mapped_column(nullable=False)
     lossfile_id: Mapped[int] = mapped_column(ForeignKey("histolossfile.id"))
     lossfile: Mapped["HistoLossFile"] = relationship()
+    premiumfile_id: Mapped[int] = mapped_column(ForeignKey("premiumfile.id"))  # TODO: To be added
+    premiumfile: Mapped["PremiumFile"] = relationship()  # TODO: To be added
 
     frequencymodel: Mapped["FrequencyModel"] = relationship(
         back_populates="frequencyseveritymodel", cascade="all, delete-orphan"
@@ -162,7 +190,7 @@ class FrequencySeverityModel(ModelFile):
     )
 
     __mapper_args__ = {
-        "polymorphic_identity": "frequencyseveritymodel",
+        "polymorphic_identity": "frequency_severity_model",
     }
 
 
@@ -219,8 +247,8 @@ class ModelYearLoss(CommonMixin, Base):
 # Database Setup
 # --------------------------------------
 
-# DATABASE_URI = "sqlite:///tnv_database.db"
-DATABASE_URI = "postgresql+psycopg2://postgres:aqzsed12@localhost:5432/tnv_database"
+DATABASE_URI = "sqlite:///tnv_database.db"
+# DATABASE_URI = "postgresql+psycopg2://postgres:aqzsed12@localhost:5432/tnv_database"
 engine = create_engine(DATABASE_URI)
 
 # Ensure foreign key constraints are enabled in SQLite

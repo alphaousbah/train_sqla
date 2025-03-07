@@ -6,7 +6,6 @@ import win32com.client as win32
 from engine.model.frequency_severity import (
     DistributionInput,
     DistributionType,
-    LossType,
     get_modelyearloss_frequency_severity,
 )
 
@@ -17,7 +16,7 @@ def open_excel_workbook(filepath: Path):
     return excel.Workbooks.Open(str(filepath))
 
 
-def write_output_data(ws_output, df_output, table_output):
+def write_output_data(ws_output, table_output, df_output):
     """Writes the output data to the Excel worksheet."""
     # Clear existing data if present
     if table_output.DataBodyRange is not None:
@@ -71,17 +70,13 @@ def main():
 
     # Step 4: Get output data
     df_output = get_modelyearloss_frequency_severity(
-        frequency_input=frequency_input,
-        severity_input=severity_input,
-        cat_share=cat_share,
-        simulated_years=simulated_years,
-        modelfile_id=modelfile_id,
+        frequency_input, severity_input, cat_share, simulated_years, modelfile_id
     )
 
     # Step 5: Write output data back to the Excel UI
     ws_output = wb.Worksheets("Output")
     table_output = ws_output.ListObjects("table_output")
-    write_output_data(ws_output, df_output, table_output)
+    write_output_data(ws_output, table_output, df_output)
 
 
 if __name__ == "__main__":
