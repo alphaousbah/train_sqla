@@ -10,8 +10,7 @@ class ModelType(Enum):
     """Defines the supported loss models."""
 
     EMPIRICAL = "empirical"
-    # FREQUENCY_SEVERITY = "frequency_severity"
-    FREQUENCY_SEVERITY = "frequencyseveritymodel"
+    FREQUENCY_SEVERITY = "frequency_severity"  # TODO: Correct the name with underscores
     COMPOSITE_FREQUENCY_SEVERITY = "composite_frequency_severity"
     EXPOSURE_BASED = "exposure_based"
 
@@ -38,11 +37,13 @@ class DistributionInput:
     Configuration for a statistical distribution.
 
     Attributes:
-        dist: The distribution type (enum).
-        params: Parameters specific to the distribution.
+        dist: The type of distribution (enum).
+        threshold: A float value representing the threshold for the distribution.
+        params: A list of float values representing the parameters specific to the distribution.
     """
 
     dist: DistributionType
+    threshold: float
     params: list[float]
 
 
@@ -50,22 +51,23 @@ class DistributionInput:
 def get_modelyearloss_frequency_severity(
     frequency_input: DistributionInput,
     severity_input: DistributionInput,
+    loss_type: LossType,
     simulated_years: int,
     modelfile_id: int,
 ) -> pl.DataFrame:
     """
-    Generates a simulated dataset of yearly loss events based on frequency
-    and severity distributions.
+    Simulates yearly loss events based on frequency and severity distributions.
 
     Args:
-        frequency_input (DistributionInput): The frequency distribution input.
-        severity_input (DistributionInput): The severity distribution input.
-        simulated_years (int): The number of years to simulate.
-        modelfile_id (int): Identifier for the model file.
+        frequency_input (DistributionInput): Configuration for the frequency distribution.
+        severity_input (DistributionInput): Configuration for the severity distribution.
+        loss_type (LossType): The type of loss being modeled.
+        simulated_years (int): Number of years to simulate loss events.
+        modelfile_id (int): Unique identifier for the model file.
 
     Returns:
-        pl.DataFrame: A Polars DataFrame containing simulated loss events
-                      with associated metadata.
+        pl.DataFrame: A Polars DataFrame containing simulated loss events, including
+                      year, day, loss amount, loss type, and other metadata.
     """
     # Generate frequency and loss-related data
     frequencies = generate_frequencies(frequency_input, simulated_years)
@@ -195,14 +197,15 @@ def get_sample_from_dist(
         ValueError: If the distribution type is not supported.
     """
     dist = distribution_input.dist
+    threshold = distribution_input.threshold
     params = distribution_input.params
 
     match dist:
         case DistributionType.POISSON:
             return poisson.rvs(mu=params[0], size=size)
         case DistributionType.NEGATIVE_BINOMIAL:
-            return nbinom.rvs(n=params[0], p=params[1], size=size)
+            return nbinom.rvs(n=threshold, p=params[0], size=size)
         case DistributionType.PARETO:
-            return pareto.rvs(scale=params[0], b=params[1], size=size)
+            return pareto.rvs(scale=threshold, b=params[0], size=size)
         case _:
             raise ValueError(f"Unsupported distribution: {dist}")
