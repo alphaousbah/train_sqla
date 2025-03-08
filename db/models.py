@@ -188,11 +188,14 @@ class FrequencySeverityModel(ModelFile):
     )  # TODO: To be added
     premiumfile: Mapped["PremiumFile"] = relationship()  # TODO: To be added
 
+    frequencymodel_id: Mapped[int] = mapped_column(ForeignKey("frequencymodel.id"))  # TODO: To be added
     frequencymodel: Mapped["FrequencyModel"] = relationship(
-        back_populates="frequencyseveritymodel", cascade="all, delete-orphan"
+        # back_populates="frequencyseveritymodel", cascade="all, delete-orphan"  # TODO: To be deleted
+        back_populates="frequencyseveritymodel"  # TODO: To be corrected
     )
+    severitymodel_id: Mapped[int] = mapped_column(ForeignKey("severitymodel.id"))  # TODO: To be added
     severitymodel: Mapped["SeverityModel"] = relationship(
-        back_populates="frequencyseveritymodel", cascade="all, delete-orphan"
+        back_populates="frequencyseveritymodel"  # TODO: To be corrected
     )
 
     __mapper_args__ = {
@@ -209,9 +212,9 @@ class FrequencyModel(CommonMixin, Base):
     parameter_2: Mapped[float]
     parameter_3: Mapped[float]
     parameter_4: Mapped[float]
-    frequencyseveritymodel_id: Mapped[int] = mapped_column(
-        ForeignKey("frequencyseveritymodel.id"), nullable=False
-    )
+    # frequencyseveritymodel_id: Mapped[int] = mapped_column(
+    #     ForeignKey("frequencyseveritymodel.id"), nullable=False
+    # )  # TODO: To be deleted
     frequencyseveritymodel: Mapped["FrequencySeverityModel"] = relationship(
         back_populates="frequencymodel"
     )
@@ -226,9 +229,9 @@ class SeverityModel(CommonMixin, Base):
     parameter_2: Mapped[float]
     parameter_3: Mapped[float]
     parameter_4: Mapped[float]
-    frequencyseveritymodel_id: Mapped[int] = mapped_column(
-        ForeignKey("frequencyseveritymodel.id"), nullable=False
-    )
+    # frequencyseveritymodel_id: Mapped[int] = mapped_column(
+    #     ForeignKey("frequencyseveritymodel.id"), nullable=False
+    # )  # TODO: To be deleted
     frequencyseveritymodel: Mapped["FrequencySeverityModel"] = relationship(
         back_populates="severitymodel"
     )
