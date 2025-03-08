@@ -44,31 +44,31 @@ def main():
     # Step 2: Extract input data
     ws_input = wb.Worksheets("Input")
     threshold = ws_input.Range("threshold").Value
-    frequency_distribution = ws_input.Range("frequency_distribution").Value
+    frequency_dist = ws_input.Range("frequency_dist").Value
     frequency_params = [
-        ws_input.Range(f"frequency_parameter_{i}").Value for i in range(5)
+        ws_input.Range(f"frequency_param_{i}").Value for i in range(5)
     ]
-    severity_distribution = ws_input.Range("severity_distribution").Value
+    severity_dist = ws_input.Range("severity_dist").Value
     severity_params = [
-        ws_input.Range(f"severity_parameter_{i}").Value for i in range(5)
+        ws_input.Range(f"severity_param_{i}").Value for i in range(5)
     ]
     cat_share = float(ws_input.Range("cat_share").Value)
     simulated_years = int(ws_input.Range("simulated_years").Value)
     modelfile_id = int(ws_input.Range("modelfile_id").Value)
 
-    # Step 3: Prepare inputs for the engine function
+    # Step 3: Prepare inputs for engine processing
     frequency_input = DistributionInput(
-        dist=DistributionType(frequency_distribution),
+        dist=DistributionType(frequency_dist),
         threshold=threshold,
         params=frequency_params,
     )
     severity_input = DistributionInput(
-        dist=DistributionType(severity_distribution),
+        dist=DistributionType(severity_dist),
         threshold=threshold,
         params=severity_params,
     )
 
-    # Step 4: Get output data
+    # Step 4: Get output data from engine
     df_output = get_modelyearloss_frequency_severity(
         frequency_input, severity_input, cat_share, simulated_years, modelfile_id
     )
