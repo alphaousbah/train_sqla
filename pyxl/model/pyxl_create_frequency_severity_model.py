@@ -45,13 +45,9 @@ def main():
     ws_input = wb.Worksheets("Input")
     threshold = ws_input.Range("threshold").Value
     frequency_dist = ws_input.Range("frequency_dist").Value
-    frequency_params = [
-        ws_input.Range(f"frequency_param_{i}").Value for i in range(5)
-    ]
+    frequency_params = [ws_input.Range(f"frequency_param_{i}").Value for i in range(5)]
     severity_dist = ws_input.Range("severity_dist").Value
-    severity_params = [
-        ws_input.Range(f"severity_param_{i}").Value for i in range(5)
-    ]
+    severity_params = [ws_input.Range(f"severity_param_{i}").Value for i in range(5)]
     cat_share = float(ws_input.Range("cat_share").Value)
     simulated_years = int(ws_input.Range("simulated_years").Value)
     modelfile_id = int(ws_input.Range("modelfile_id").Value)

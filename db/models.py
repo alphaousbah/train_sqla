@@ -19,7 +19,6 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-
 # --------------------------------------
 # Base Classes and Mixins
 # --------------------------------------
@@ -79,18 +78,22 @@ class Analysis(CommonMixin, Base):
     client: Mapped["Client"] = relationship(back_populates="analyses")
 
     premiumfiles: Mapped[List["PremiumFile"]] = relationship(
-        secondary=lambda: analysis_premiumfile_table, back_populates="analyses"  # TODO: To be updated
+        secondary=lambda: analysis_premiumfile_table,
+        back_populates="analyses",  # TODO: To be updated
     )
     histolossfiles: Mapped[List["HistoLossFile"]] = relationship(
-        secondary=lambda: analysis_histolossfile_table, back_populates="analyses"  # TODO: To be updated
+        secondary=lambda: analysis_histolossfile_table,
+        back_populates="analyses",  # TODO: To be updated
     )
     modelfiles: Mapped[List["ModelFile"]] = relationship(
-        secondary=lambda: analysis_modelfile_table, back_populates="analyses"  # TODO: To be updated
+        secondary=lambda: analysis_modelfile_table,
+        back_populates="analyses",  # TODO: To be updated
     )
 
 
 class PremiumFile(CommonMixin, Base):
     """Represents a premium file."""
+
     id: Mapped[int] = mapped_column(primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
     client: Mapped["Client"] = relationship(back_populates="premiumfiles")
@@ -107,6 +110,7 @@ analysis_premiumfile_table: Final[Table] = Table(
     Column("analysis_id", ForeignKey("analysis.id"), primary_key=True),
     Column("premiumfile_id", ForeignKey("premiumfile.id"), primary_key=True),
 )
+
 
 class HistoLossFile(CommonMixin, Base):
     """Represents a historical loss file."""
@@ -179,7 +183,9 @@ class FrequencySeverityModel(ModelFile):
     threshold: Mapped[int] = mapped_column(nullable=False)
     lossfile_id: Mapped[int] = mapped_column(ForeignKey("histolossfile.id"))
     lossfile: Mapped["HistoLossFile"] = relationship()
-    premiumfile_id: Mapped[int] = mapped_column(ForeignKey("premiumfile.id"))  # TODO: To be added
+    premiumfile_id: Mapped[int] = mapped_column(
+        ForeignKey("premiumfile.id")
+    )  # TODO: To be added
     premiumfile: Mapped["PremiumFile"] = relationship()  # TODO: To be added
 
     frequencymodel: Mapped["FrequencyModel"] = relationship(
@@ -263,7 +269,7 @@ session = Session()
 
 @contextmanager
 def session_scope():
-    """Provide a transactional scope for database operations."""
+    """Provide a transactional scope for db operations."""
     session = Session()
     try:
         yield session
