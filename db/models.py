@@ -2,7 +2,6 @@ from contextlib import contextmanager
 from typing import Final, List
 
 from sqlalchemy import (
-    CheckConstraint,
     Column,
     ForeignKey,
     String,
@@ -19,7 +18,6 @@ from sqlalchemy.orm import (
     relationship,
     sessionmaker,
 )
-
 
 # --------------------------------------
 # Base Classes and Mixins
@@ -58,18 +56,12 @@ class Client(CommonMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
 
-    analyses: Mapped[List["Analysis"]] = relationship(
-        back_populates="client"
-    )
-    premiumfiles: Mapped[List["PremiumFile"]] = relationship(
-        back_populates="client"
-    )
+    analyses: Mapped[List["Analysis"]] = relationship(back_populates="client")
+    premiumfiles: Mapped[List["PremiumFile"]] = relationship(back_populates="client")
     histolossfiles: Mapped[List["HistoLossFile"]] = relationship(
         back_populates="client"
     )
-    modelfiles: Mapped[List["ModelFile"]] = relationship(
-        back_populates="client"
-    )
+    modelfiles: Mapped[List["ModelFile"]] = relationship(back_populates="client")
 
 
 class Analysis(CommonMixin, Base):
@@ -81,15 +73,15 @@ class Analysis(CommonMixin, Base):
 
     premiumfiles: Mapped[List["PremiumFile"]] = relationship(
         secondary=lambda: analysis_premiumfile_table,
-        back_populates="analyses",  # TODO: To be updated
+        back_populates="analyses",  # TODO: Add back_populates
     )
     histolossfiles: Mapped[List["HistoLossFile"]] = relationship(
         secondary=lambda: analysis_histolossfile_table,
-        back_populates="analyses",  # TODO: To be updated
+        back_populates="analyses",  # TODO: Add back_populates
     )
     modelfiles: Mapped[List["ModelFile"]] = relationship(
         secondary=lambda: analysis_modelfile_table,
-        back_populates="analyses",  # TODO: To be updated
+        back_populates="analyses",  # TODO: Add back_populates
     )
 
 
@@ -100,10 +92,9 @@ class PremiumFile(CommonMixin, Base):
     client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
     client: Mapped["Client"] = relationship(back_populates="premiumfiles")
 
-    # TODO: To be added
     analyses: Mapped[List[Analysis]] = relationship(
         secondary=lambda: analysis_premiumfile_table, back_populates="premiumfiles"
-    )
+    )  # TODO: To be added
 
 
 analysis_premiumfile_table: Final[Table] = Table(
@@ -123,7 +114,7 @@ class HistoLossFile(CommonMixin, Base):
 
     analyses: Mapped[List[Analysis]] = relationship(
         secondary=lambda: analysis_histolossfile_table, back_populates="histolossfiles"
-    )
+    )  # TODO: To be added
 
 
 analysis_histolossfile_table: Final[Table] = Table(
@@ -151,7 +142,7 @@ class ModelFile(CommonMixin, Base):
 
     analyses: Mapped[List[Analysis]] = relationship(
         secondary=lambda: analysis_modelfile_table, back_populates="modelfiles"
-    )
+    )  # TODO: To be added
 
     __mapper_args__ = {
         "polymorphic_identity": "modelfile",
@@ -191,11 +182,13 @@ class FrequencySeverityModel(ModelFile):
     premiumfile: Mapped["PremiumFile"] = relationship()  # TODO: To be added
 
     frequencymodel: Mapped["FrequencyModel"] = relationship(
-        back_populates="frequencyseveritymodel", cascade="all, delete-orphan"  # TODO: To be corrected
+        back_populates="frequencyseveritymodel",
+        cascade="all, delete-orphan",  # TODO: To be corrected
         # back_populates="frequencyseveritymodel"  # TODO: To be corrected
     )
     severitymodel: Mapped["SeverityModel"] = relationship(
-        back_populates="frequencyseveritymodel", cascade="all, delete-orphan"  # TODO: To be corrected
+        back_populates="frequencyseveritymodel",
+        cascade="all, delete-orphan",  # TODO: To be corrected
         # back_populates="frequencyseveritymodel"  # TODO: To be corrected
     )
 

@@ -307,17 +307,17 @@ def delete_db_record(
     record_id: int,
 ) -> None:
     """
-    Delete a record from the database by its model class and ID.
+        Delete a record from the database by its model class and ID.
+    <
+        Args:
+            session (Session): The SQLAlchemy session to use for database operations.
+            model (Type[DeclarativeMeta]): The SQLAlchemy model class of the record to delete.
+            record_id (int): The ID of the record to delete.
 
-    Args:
-        session (Session): The SQLAlchemy session to use for database operations.
-        model (Type[DeclarativeMeta]): The SQLAlchemy model class of the record to delete.
-        record_id (int): The ID of the record to delete.
-
-    Raises:
-        ValueError: If the record with the given ID is not found.
-        SQLAlchemyError: If a database error occurs.
-        Exception: For any other unexpected errors.
+        Raises:
+            ValueError: If the record with the given ID is not found.
+            SQLAlchemyError: If a database error occurs.
+            Exception: For any other unexpected errors.
     """
     try:
         # Fetch the record
