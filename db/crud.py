@@ -43,7 +43,7 @@ def create_client(session: Session, client_name: str):
 
         # Commit the transaction
         session.commit()
-        print(f"Client '{client_name}' added successfully.")
+        print(f"Client '{client_name}' with ID {client.id} added successfully.")
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -84,7 +84,7 @@ def create_analysis(session, client_id):
 
         # Commit the transaction
         session.commit()
-        print("Analysis added successfully.")
+        print(f"Analysis with ID {analysis.id} added successfully.")
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -129,7 +129,7 @@ def create_premium_file(session: Session, analysis_id: int):
 
         # Commit the transaction
         session.commit()
-        print("Premium file added successfully.")
+        print(f"Premium file with ID {premiumfile.id} added successfully.")
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -174,7 +174,7 @@ def create_historical_loss_file(session: Session, analysis_id: int):
 
         # Commit the transaction
         session.commit()
-        print("Historical loss file added successfully.")
+        print(f"Historical loss file with ID {histolossfile.id} added successfully.")
 
     except SQLAlchemyError as e:
         session.rollback()
@@ -286,7 +286,7 @@ def create_frequency_severity_model(
         print(
             f"Time to commit transaction: {time.perf_counter() - start_time:.2f} seconds"
         )
-        print("Frequency-Severity Model created successfully.")
+        print(f"Frequency-Severity Model with ID {modelfile.id} created successfully.")
 
     except SQLAlchemyError as e:
         session.rollback()

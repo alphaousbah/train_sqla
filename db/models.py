@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from enum import Enum
 from typing import Final, List
 
 from sqlalchemy import (
@@ -125,6 +126,15 @@ analysis_histolossfile_table: Final[Table] = Table(
 )
 
 
+class ModelType(Enum):
+    """Defines the supported loss models."""
+
+    EMPIRICAL = "empirical"
+    FREQUENCY_SEVERITY = "frequency_severity"  # TODO: Correct the name with underscores
+    COMPOSITE_FREQUENCY_SEVERITY = "composite_frequency_severity"
+    EXPOSURE_BASED = "exposure_based"
+
+
 class ModelFile(CommonMixin, Base):
     """Base class for model files."""
 
@@ -201,11 +211,12 @@ class FrequencyModel(CommonMixin, Base):
     """Represents a frequency model."""
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    parameter_0: Mapped[float] = mapped_column(nullable=False)
+    parameter_0: Mapped[float] = mapped_column(nullable=False)  # TODO: To be added
     parameter_1: Mapped[float]
     parameter_2: Mapped[float]
     parameter_3: Mapped[float]
     parameter_4: Mapped[float]
+    # parameter_5: Mapped[float]  # TODO: To be deleted
     frequencyseveritymodel_id: Mapped[int] = mapped_column(
         ForeignKey("frequencyseveritymodel.id"), nullable=False
     )
@@ -218,11 +229,12 @@ class SeverityModel(CommonMixin, Base):
     """Represents a severity model."""
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    parameter_0: Mapped[float] = mapped_column(nullable=False)
+    parameter_0: Mapped[float] = mapped_column(nullable=False)  # TODO: To be added
     parameter_1: Mapped[float]
     parameter_2: Mapped[float]
     parameter_3: Mapped[float]
     parameter_4: Mapped[float]
+    # parameter_5: Mapped[float]  # TODO: To be deleted
     frequencyseveritymodel_id: Mapped[int] = mapped_column(
         ForeignKey("frequencyseveritymodel.id"), nullable=False
     )

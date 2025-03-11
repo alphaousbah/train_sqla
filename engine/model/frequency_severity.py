@@ -6,15 +6,6 @@ import polars as pl
 from scipy.stats import nbinom, pareto, poisson
 
 
-class ModelType(Enum):
-    """Defines the supported loss models."""
-
-    EMPIRICAL = "empirical"
-    FREQUENCY_SEVERITY = "frequency_severity"  # TODO: Correct the name with underscores
-    COMPOSITE_FREQUENCY_SEVERITY = "composite_frequency_severity"
-    EXPOSURE_BASED = "exposure_based"
-
-
 class DistributionType(Enum):
     """Defines the supported statistical distributions."""
 
