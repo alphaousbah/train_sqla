@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from typing import Final, List
 
 from sqlalchemy import (
+    CheckConstraint,
     Column,
     ForeignKey,
     String,
@@ -18,6 +19,7 @@ from sqlalchemy.orm import (
     relationship,
     sessionmaker,
 )
+
 
 # --------------------------------------
 # Base Classes and Mixins
@@ -57,16 +59,16 @@ class Client(CommonMixin, Base):
     name: Mapped[str] = mapped_column(String(50), nullable=False)
 
     analyses: Mapped[List["Analysis"]] = relationship(
-        back_populates="client", cascade="all, delete-orphan"
+        back_populates="client"
     )
     premiumfiles: Mapped[List["PremiumFile"]] = relationship(
-        back_populates="client", cascade="all, delete-orphan"
+        back_populates="client"
     )
     histolossfiles: Mapped[List["HistoLossFile"]] = relationship(
-        back_populates="client", cascade="all, delete-orphan"
+        back_populates="client"
     )
     modelfiles: Mapped[List["ModelFile"]] = relationship(
-        back_populates="client", cascade="all, delete-orphan"
+        back_populates="client"
     )
 
 
@@ -188,14 +190,13 @@ class FrequencySeverityModel(ModelFile):
     )  # TODO: To be added
     premiumfile: Mapped["PremiumFile"] = relationship()  # TODO: To be added
 
-    frequencymodel_id: Mapped[int] = mapped_column(ForeignKey("frequencymodel.id"))  # TODO: To be added
     frequencymodel: Mapped["FrequencyModel"] = relationship(
-        # back_populates="frequencyseveritymodel", cascade="all, delete-orphan"  # TODO: To be deleted
-        back_populates="frequencyseveritymodel"  # TODO: To be corrected
+        back_populates="frequencyseveritymodel", cascade="all, delete-orphan"  # TODO: To be corrected
+        # back_populates="frequencyseveritymodel"  # TODO: To be corrected
     )
-    severitymodel_id: Mapped[int] = mapped_column(ForeignKey("severitymodel.id"))  # TODO: To be added
     severitymodel: Mapped["SeverityModel"] = relationship(
-        back_populates="frequencyseveritymodel"  # TODO: To be corrected
+        back_populates="frequencyseveritymodel", cascade="all, delete-orphan"  # TODO: To be corrected
+        # back_populates="frequencyseveritymodel"  # TODO: To be corrected
     )
 
     __mapper_args__ = {
@@ -212,9 +213,9 @@ class FrequencyModel(CommonMixin, Base):
     parameter_2: Mapped[float]
     parameter_3: Mapped[float]
     parameter_4: Mapped[float]
-    # frequencyseveritymodel_id: Mapped[int] = mapped_column(
-    #     ForeignKey("frequencyseveritymodel.id"), nullable=False
-    # )  # TODO: To be deleted
+    frequencyseveritymodel_id: Mapped[int] = mapped_column(
+        ForeignKey("frequencyseveritymodel.id"), nullable=False
+    )
     frequencyseveritymodel: Mapped["FrequencySeverityModel"] = relationship(
         back_populates="frequencymodel"
     )
@@ -229,9 +230,9 @@ class SeverityModel(CommonMixin, Base):
     parameter_2: Mapped[float]
     parameter_3: Mapped[float]
     parameter_4: Mapped[float]
-    # frequencyseveritymodel_id: Mapped[int] = mapped_column(
-    #     ForeignKey("frequencyseveritymodel.id"), nullable=False
-    # )  # TODO: To be deleted
+    frequencyseveritymodel_id: Mapped[int] = mapped_column(
+        ForeignKey("frequencyseveritymodel.id"), nullable=False
+    )
     frequencyseveritymodel: Mapped["FrequencySeverityModel"] = relationship(
         back_populates="severitymodel"
     )
@@ -256,8 +257,8 @@ class ModelYearLoss(CommonMixin, Base):
 # Database Setup
 # --------------------------------------
 
-DATABASE_URI = "sqlite:///tnv_database.db"
-# DATABASE_URI = "postgresql+psycopg2://postgres:aqzsed12@localhost:5432/tnv_database"
+# DATABASE_URI = "sqlite:///tnv_database.db"
+DATABASE_URI = "postgresql+psycopg2://postgres:aqzsed12@localhost:5432/tnv_database"
 engine = create_engine(DATABASE_URI)
 
 # Ensure foreign key constraints are enabled in SQLite
