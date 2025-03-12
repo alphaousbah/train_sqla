@@ -11,6 +11,7 @@ from db.models import (
     FrequencyModel,
     FrequencySeverityModel,
     HistoLossFile,
+    ModelType,  # TODO: To be added
     ModelYearLoss,
     PremiumFile,
     SeverityModel,
@@ -240,7 +241,7 @@ def create_frequency_severity_model(
 
         # Create the frequency-severity model
         modelfile = FrequencySeverityModel(
-            model_type="frequency_severity_model",
+            model_type=ModelType.FREQUENCY_SEVERITY.value,  # TODO: To be corrected
             threshold=threshold,
             years_simulated=years_simulated,
             lossfile_id=lossfile_id,

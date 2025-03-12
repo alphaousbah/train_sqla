@@ -126,11 +126,13 @@ analysis_histolossfile_table: Final[Table] = Table(
 )
 
 
-class ModelType(Enum):
+class ModelType(Enum):  # TODO: To be added
     """Defines the supported loss models."""
 
     EMPIRICAL = "empirical"
-    FREQUENCY_SEVERITY = "frequency_severity"  # TODO: Correct the name with underscores
+    FREQUENCY_SEVERITY = (
+        "frequency_severity"  # TODO: Improve the value with underscores
+    )
     COMPOSITE_FREQUENCY_SEVERITY = "composite_frequency_severity"
     EXPOSURE_BASED = "exposure_based"
 
@@ -175,7 +177,7 @@ class EmpiricalModel(ModelFile):
     threshold: Mapped[int] = mapped_column(nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": "empiricalmodel",
+        "polymorphic_identity": ModelType.EMPIRICAL.value,  # TODO: To be corrected
     }
 
 
@@ -203,7 +205,7 @@ class FrequencySeverityModel(ModelFile):
     )
 
     __mapper_args__ = {
-        "polymorphic_identity": "frequency_severity_model",
+        "polymorphic_identity": ModelType.FREQUENCY_SEVERITY.value,  # TODO: To be corrected
     }
 
 
